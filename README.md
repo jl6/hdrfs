@@ -182,34 +182,24 @@ Example benchmark showing best case performance:
     $ dd if=/dev/zero count=8000 bs=131072 of=mnt/1
     8000+0 records in
     8000+0 records out
-    1048576000 bytes (1.0 GB, 1000 MiB) copied, 5.14199 s, 204 MB/s
+    1048576000 bytes (1.0 GB, 1000 MiB) copied, 5.6616 s, 185 MB/s
 
 Example benchmark showing far worse performance:
 
     $ dd if=/dev/zero count=256000 bs=4096 of=mnt/2
     256000+0 records in
     256000+0 records out
-    1048576000 bytes (1.0 GB, 1000 MiB) copied, 52.9098 s, 19.8 MB/s
+    1048576000 bytes (1.0 GB, 1000 MiB) copied, 25.028 s, 41.9 MB/s
 
-Reversing the transfers above shows that block size also influences read
-performance:
+HDRFS attempts to counteract the effect of small writes by buffering into 128KiB
+chunks. This means that slow 4K writes won't compromise future reads:
 
-    $ dd if=mnt/1 of=1 bs=131072
+    $ dd if=mnt/2 of=/dev/null bs=131072
     8000+0 records in
     8000+0 records out
-    1048576000 bytes (1.0 GB, 1000 MiB) copied, 4.3497 s, 241 MB/s
+    1048576000 bytes (1.0 GB, 1000 MiB) copied, 2.262 s, 464 MB/s
 
-    $ dd if=mnt/2 of=2 bs=131072
-    8000+0 records in
-    8000+0 records out
-    1048576000 bytes (1.0 GB, 1000 MiB) copied, 9.1787 s, 114 MB/s
-
-Therefore it is best to interact with HDRFS using utilities which use the
-maximum possible block size (128K). GNU `cp`, `mc` and `rsync` are recommended.
-Nautilus (the GNOME file manager, which is the default on Debian and Ubuntu)
-uses 4KiB block size by default and is not recommended.
-
-As a benchmark, here is `postmark` running with default settings on an HDRFS
+As a further benchmark, here is `postmark` running with default settings on an HDRFS
 filesystem:
 
     Creating files...Done
